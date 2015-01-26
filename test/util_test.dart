@@ -9,16 +9,18 @@ import 'package:unittest/unittest.dart';
 
 void runTests() {
   group('Utilities', () {
-    test('convert to Chrome buffer', () {
-      List<int> raw = [
-        0x70, 0xca, 0x0f, 0x7a, 0xcb, 0xa1, 0x06, 0x6e, 0x71, 0x22
-      ];
+    List<int> raw = [
+      0x70, 0xca, 0x0f, 0x7a, 0xcb, 0xa1, 0x06, 0x6e, 0x71
+    ];
 
-      forge.ByteBuffer forgeBuffer = new forge.ByteBuffer.fromBuffer(
-        new Uint8List.fromList(raw).buffer
-      );
+    ByteBuffer buffer;
 
-      chrome.ArrayBuffer chromeBuffer = util.fromString(forgeBuffer);
+    setUp(() {
+      buffer = new Uint8List.fromList(raw).buffer;
+    });
+
+    test('convert to ArrayBuffer', () {
+      chrome.ArrayBuffer chromeBuffer = util.arrayFromBuffer(new forge.ByteBuffer.fromBuffer(buffer));
       expect(chromeBuffer.getBytes(), orderedEquals(raw));
     });
   });

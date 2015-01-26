@@ -153,7 +153,7 @@ abstract class SslSocket implements forge.TlsHandler {
   }
 
   void write(ByteBuffer data) {
-    _tls.prepare(fromBuffer(data));
+    _tls.prepare(stringFromBytes(data));
   }
 
   void _onReceive(chrome.ReceiveInfo info) {
@@ -168,7 +168,7 @@ abstract class SslSocket implements forge.TlsHandler {
     }
 
     _tls.process(
-      fromBuffer(
+      stringFromBytes(
         new Uint8List.fromList(
           info.data.getBytes()
         )
@@ -213,10 +213,9 @@ abstract class SslSocket implements forge.TlsHandler {
 
   void tlsDataReady(forge.TlsConnection connection) {
     forge.ByteBuffer data = connection.tlsData;
-    chrome.ArrayBuffer buffer = fromString(data);
+    final int total = data.length();
 
-    _log(() => 'Raw length: ${data.length()}');
-    _log(() => 'Converted length: ${buffer.getBytes().length}');
+    chrome.ArrayBuffer buffer = arrayFromBuffer(data);
 
     chrome.sockets.tcp.send(
         _socketId,
@@ -230,7 +229,6 @@ abstract class SslSocket implements forge.TlsHandler {
         }
 
         int sent = info.bytesSent;
-        int total = data.length();
 
         if (sent == total) {
           _emit(_drainStream);
@@ -246,7 +244,7 @@ abstract class SslSocket implements forge.TlsHandler {
   }
 
   void dataReady(forge.TlsConnection connection) {
-    _emit(_dataStream, fromString(connection.data));
+    _emit(_dataStream, arrayFromBuffer(connection.data));
   }
 
   void closed(forge.TlsConnection connection) {
