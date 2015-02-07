@@ -13,14 +13,14 @@ void runTests() {
       0x70, 0xca, 0x0f, 0x7a, 0xcb, 0xa1, 0x06, 0x6e, 0x71
     ];
 
-    ByteBuffer buffer;
+    TypedData data;
 
     setUp(() {
-      buffer = new Uint8List.fromList(raw).buffer;
+      data = new Uint8List.fromList(raw);
     });
 
     test('convert to ArrayBuffer', () {
-      chrome.ArrayBuffer chromeBuffer = util.arrayFromBuffer(new forge.ByteBuffer.fromBuffer(buffer));
+      chrome.ArrayBuffer chromeBuffer = util.arrayFromBuffer(new forge.ByteBuffer.fromData(data));
       expect(chromeBuffer.getBytes(), orderedEquals(raw));
     });
   });

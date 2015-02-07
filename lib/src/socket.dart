@@ -113,11 +113,13 @@ abstract class SslSocket implements forge.TlsHandler {
     logger.severe(() => 'Error: ${expand(message)}');
   }
 
-  void _log(dynamic message) {
-    logger.fine(() =>
-      _socketId != null
-        ? '[$_socketId] ${expand(message)}'
-        : expand(message)
+  void _log(dynamic message, [Level level=Level.FINE]) {
+    logger.log(
+      level,
+      () =>
+        _socketId != null
+          ? '[$_socketId] ${expand(message)}'
+          : expand(message)
     );
   }
 
@@ -152,8 +154,8 @@ abstract class SslSocket implements forge.TlsHandler {
     });
   }
 
-  void write(ByteBuffer data) {
-    _tls.prepare(stringFromBytes(data));
+  void write(ByteBuffer buffer) {
+    _tls.prepare(stringFromBytes(new Uint8List.view(buffer)));
   }
 
   void _onReceive(chrome.ReceiveInfo info) {
@@ -164,15 +166,16 @@ abstract class SslSocket implements forge.TlsHandler {
     _active();
 
     if (!_tls.open) {
+      _emitError('Received data but TLS connection is no longer open');
       return;
     }
 
+    List<int> bytes = info.data.getBytes();
+    _log(() => 'Received ${bytes.length} bytes of data', Level.FINEST);
+
     _tls.process(
       stringFromBytes(
-        new Uint8List.fromList(
-          info.data.getBytes()
-        )
-        .buffer
+        new Uint8List.fromList(bytes)
       )
     );
   }
@@ -215,6 +218,8 @@ abstract class SslSocket implements forge.TlsHandler {
     forge.ByteBuffer data = connection.tlsData;
     final int total = data.length();
 
+    _log(() => 'Sending $total bytes of data', Level.FINEST);
+
     chrome.ArrayBuffer buffer = arrayFromBuffer(data);
 
     chrome.sockets.tcp.send(
@@ -231,6 +236,7 @@ abstract class SslSocket implements forge.TlsHandler {
         int sent = info.bytesSent;
 
         if (sent == total) {
+          _log(() => 'Send complete', Level.FINEST);
           _emit(_drainStream);
         }
         else {
@@ -244,6 +250,7 @@ abstract class SslSocket implements forge.TlsHandler {
   }
 
   void dataReady(forge.TlsConnection connection) {
+    _log(() => 'Parsed ${connection.data.length()} bytes of data');
     _emit(_dataStream, arrayFromBuffer(connection.data));
   }
 
