@@ -3,10 +3,12 @@ description: >
   SSL connection library for Dart-based Chrome apps.
 version: 0.0.1
 author: Nat Burns <nbaccount@burnskids.com>
+homepage: https://github.com/burnnat/chrome_ssl.dart
 dependencies:
-  forge:
-    path: ../forge.dart
-  chrome: any
-  logging: any
+  forge: ^0.0.1
+  chrome: ^0.6.5
+  logging: ^0.9.3
 dev_dependencies:
   unittest: any
+environment:
+  sdk: ">=1.8.3 <2.0.0"
