@@ -130,6 +130,7 @@ abstract class SslSocket implements forge.TlsHandler {
 
   void close() {
     if (_tls != null) {
+      _log('Closing TLS connection');
       _tls.close();
     }
   }
